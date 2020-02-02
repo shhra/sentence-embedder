@@ -1,20 +1,26 @@
 version: '3.7'
 
 services:
-    web:
+    application:
         build: ./web
-        command: gunicorn --bind 0.0.0.0:5000 wsgi:app
+        command: gunicorn -c gunicorn_ini.py wsgi:app
         #command: python wsgi.py
         volumes:
             - ./web/:/usr/src/app/
-        expose:
-            - 5000
-
+        ports:
+            - 5000:5000
 
     nginx:
-        build: ./nginx
+        build:
+            context: ./nginx
+            args:
+                DOMAIN: ${DOMAIN}
+                FLASK: application
         ports:
             - 80:80
+            - 443:443
+        volumes:
+            - /etc/letsencrypt:/etc/letsencrypt
         depends_on:
-            - web
+            - application
 

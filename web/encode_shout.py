@@ -1,5 +1,5 @@
-from flask import Flask, request
-import pickle
+from flask import Flask, request, jsonify
+import numpy as np
 from sentence_transformers import SentenceTransformer
 
 
@@ -11,10 +11,14 @@ model = SentenceTransformer(model_path)
 def hello():
     return "Thank you for visiting me. May god bless you!"
 
-@app.route('/encode')
+@app.route('/encode', methods=['GET'])
 def encode():
-    shout = request.args.get('shout')
-    value = pickle.dumps(model.encode(shout))
-    return value
+    shout = request.get_json()
+    value = model.encode(shout['shout'])
+    my_val = [val.tolist() for val in value]
+    data = {'encodings': my_val}
+    return jsonify(data)
+
+    # return pickle.dumps(model.encode(shout))
 
 
